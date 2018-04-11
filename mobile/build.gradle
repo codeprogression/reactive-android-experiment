@@ -1,0 +1,98 @@
+import com.codeprogression.dependencies.*
+
+apply from: "tmdb.gradle"
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
+
+    compileOptions{
+        incremental true
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    dataBinding {
+        enabled true
+    }
+
+    defaultConfig {
+        applicationId "com.codeprogression.rad"
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "TMDB_API_KEY", "\"${apiKey}\""
+        buildConfigField "String", "TMDB_ACCESS_TOKEN", "\"${accessToken}\""
+    }
+
+    buildTypes {
+        debug {
+            testCoverageEnabled true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
+    }
+
+    kotlin { experimental { coroutines 'enable' } }
+
+}
+
+dependencies {
+    implementation Kotlin.stdLib
+    kapt GradlePlugin.dataBindingCompiler
+
+    implementation Support.appcompatV7
+    implementation Support.design
+    implementation Support.constraintLayout
+    implementation Support.recyclerView
+
+    implementation ArchitectureComponents.extensions
+    kapt ArchitectureComponents.compiler
+
+    implementation Rx2.Binding.Kotlin.core
+    implementation Rx2.Binding.Kotlin.design
+    implementation Rx2.Binding.Kotlin.recyclerView
+    implementation Rx2.kotlin
+    implementation Rx2.java
+    implementation Rx2.android
+
+    implementation OkHttp.okhttp
+    implementation OkHttp.loggingInterceptor
+    implementation Gson.gson
+
+    implementation JodaTime.android
+
+    implementation Dagger2.dagger
+//    implementation Dagger2.androidSupport
+//    kapt Dagger2.androidProcessor
+
+    testImplementation UnitTest.junit
+    testImplementation UnitTest.mockitoKotlin
+    testImplementation Kotlin.test
+
+    androidTestImplementation Support.testRunner
+    androidTestImplementation Support.espressoCore
+}
+
+androidExtensions {
+    experimental = true
+}
+
+//Needed for dagger and databinding. data binding errors will prevent dagger errors from showing.
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xmaxerrs" << "1000"
+    }
+}

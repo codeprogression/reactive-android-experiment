@@ -1,0 +1,33 @@
+import com.codeprogression.dependencies.*
+
+buildscript {
+    ext {
+        versionName= "1.0.0-alpha1"
+        versionCode= 1
+        compileSdkVersion = 27
+        minSdkVersion = 16
+        targetSdkVersion = 27
+        buildToolsVersion = "27.0.3"
+    }
+
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath GradlePlugin.plugin
+        classpath Kotlin.plugin
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        google()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
