@@ -3,7 +3,7 @@
 package com.codeprogression.dependencies
 
 object GradlePlugin {
-    private const val version = "3.1.0"
+    private const val version = "3.1.1"
     const val plugin = "com.android.tools.build:gradle:${version}"
     const val dataBindingCompiler = "com.android.databinding:compiler:${version}"
 }

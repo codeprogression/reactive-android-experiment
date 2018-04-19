@@ -8,7 +8,6 @@ import com.codeprogression.rad.R
 import com.codeprogression.rad.core.BindingViewHolder
 import com.codeprogression.rad.databinding.MoviesItemBinding
 import com.codeprogression.rad.movies.ui.MovieItemViewState
-import com.codeprogression.rad.movies.ui.MoviesUserInterface
 import com.codeprogression.rad.movies.ui.MoviesAction
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -17,29 +16,36 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 
 class MoviesAdapter(
-        private val context: Context,
-        private val ui: MoviesUserInterface
+        private val context: Context
 ) : RecyclerView.Adapter<BindingViewHolder<MoviesItemBinding>>() {
 
     val actions: PublishSubject<MoviesAction> = PublishSubject.create()
     private val list: MutableList<MovieItemViewState> = arrayListOf()
 
+    init {
+        setHasStableIds(true)
+    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<MoviesItemBinding> {
         return BindingViewHolder.inflate(context, R.layout.movies_item, parent, false)
     }
 
     override fun onBindViewHolder(holder: BindingViewHolder<MoviesItemBinding>, position: Int) {
-        holder.binding?.apply {
-            state = list[position]
-            invalidateAll()
-        }
+
         holder.itemView.setOnClickListener{
             actions.onNext(MoviesAction.SelectMovie(holder.adapterPosition))
+        }
+        holder.binding?.apply {
+            state = list[position]
+            executePendingBindings()
         }
     }
 
     override fun getItemCount(): Int {
         return list.size
+    }
+
+    override fun getItemId(position: Int): Long {
+        return list[position].id.get().toLong()
     }
 
     fun update(list: List<MovieItemViewState>) {
@@ -49,8 +55,8 @@ class MoviesAdapter(
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                        { _ ->
-                            // no-op
+                        {
+                            it.printStackTrace()
                         },
                         { result ->
                             this.list.clear()

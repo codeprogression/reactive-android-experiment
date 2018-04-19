@@ -6,6 +6,7 @@
         <import type="android.graphics.Typeface"/>
     </data>
     <android.support.constraint.ConstraintLayout
+        android:background="?attr/selectableItemBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="4dp">

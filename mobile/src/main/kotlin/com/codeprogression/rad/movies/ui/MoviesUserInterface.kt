@@ -17,6 +17,7 @@ class MoviesUserInterface @Inject constructor(
             listOf(
                     actions.ofType(MoviesAction.StartScreen::class.java).compose(start()),
                     actions.ofType(MoviesAction.LoadMovies::class.java).compose(load()),
+                    actions.ofType(MoviesAction.RefreshMovies::class.java).compose(load()),
                     actions.ofType(MoviesAction.SelectMovie::class.java).compose(select())
             )
 
@@ -27,8 +28,12 @@ class MoviesUserInterface @Inject constructor(
     private fun start(): ObservableTransformer<MoviesAction, MoviesState> {
         return ObservableTransformer {
             when (currentState.started) {
-                true -> it.map { action -> action.getState(currentState) }
-                false -> load().apply(it)
+                true -> {
+                    it.map { currentState }
+                }
+                false -> {
+                    load().apply(it)
+                }
             }
         }
     }
@@ -46,9 +51,20 @@ class MoviesUserInterface @Inject constructor(
                             val loadCompleted = MoviesAction.LoadCompleted(movies)
                             Observable.just<MoviesAction>(loadCompleted)
                                     .startWith(action)
+                                    .onErrorReturn {
+                                        MoviesAction.LoadFailed(it)
+                                    }
                         }
-                        .onErrorReturn { MoviesAction.LoadFailed(it) }
-                        .map { it.getState(currentState) }
+                        .onErrorReturn {
+                            MoviesAction.LoadFailed(it)
+                        }
+                        .map {
+                            println(">>>> Action Sent: $it")
+                            val state = it.getState(currentState)
+                            println("<<<< State Updated: $state")
+                            state
+
+                        }
             }
         }
     }

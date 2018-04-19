@@ -4,8 +4,9 @@ import com.codeprogression.rad.movies.service.Movie
 
 data class MoviesState(
         val list: List<Movie> = listOf(),
-        val selected: Int = 0,
+        val selected: Int? = null,
         val loading: Boolean = false,
+        val refreshing: Boolean = false,
         val error: String? = null,
         val started: Boolean = true
 ) {

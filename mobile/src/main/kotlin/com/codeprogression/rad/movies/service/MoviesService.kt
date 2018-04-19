@@ -8,6 +8,7 @@ import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
 
 interface MoviesService {
     fun getList(page: Int): Single<MovieCollection>
@@ -22,7 +23,7 @@ class DefaultMoviesService : MoviesService {
                 .build()
 
         val httpLoggingInterceptor = HttpLoggingInterceptor()
-        httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+        httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BASIC
 
         val client = OkHttpClient.Builder()
                 .addInterceptor(httpLoggingInterceptor)
@@ -33,6 +34,7 @@ class DefaultMoviesService : MoviesService {
                 .create()
 
         return Single.fromCallable { client.newCall(request).execute() }
+                .timeout(5, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
                 .map {

@@ -12,12 +12,34 @@
         tools:context="com.codeprogression.rad.movies.MoviesActivity"
         tools:showIn="@layout/movies_activity">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/moviesView"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/moviesRefresh"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
+            android:layout_height="match_parent">
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/moviesView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="8dp"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp"
+                android:paddingTop="8dp"
+            />
+        </android.support.v4.widget.SwipeRefreshLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No movies"
+            android:visibility="@{!state.loading &amp;&amp; state.empty}"/>
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{state.loading}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
         />
     </android.support.constraint.ConstraintLayout>
 </layout>

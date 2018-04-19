@@ -9,7 +9,6 @@ apply plugin: 'kotlin-android-extensions'
 android {
 
     compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion rootProject.buildToolsVersion
 
     compileOptions{
         incremental true
@@ -63,6 +62,7 @@ dependencies {
 
     implementation Rx2.Binding.Kotlin.core
     implementation Rx2.Binding.Kotlin.design
+    implementation Rx2.Binding.Kotlin.support
     implementation Rx2.Binding.Kotlin.recyclerView
     implementation Rx2.kotlin
     implementation Rx2.java

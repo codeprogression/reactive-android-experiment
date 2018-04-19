@@ -18,7 +18,7 @@ abstract class ScreenUserInterface<ACTION : UserInterfaceAction<out STATE>, STAT
                     currentState = it
                 }
                 .replay(1)
-                .autoConnect()
+                .refCount()
     }
 
     private fun transform(): ObservableTransformer<in ACTION, STATE> {
