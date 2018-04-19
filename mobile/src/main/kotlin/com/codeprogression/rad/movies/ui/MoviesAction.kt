@@ -6,7 +6,10 @@ import com.codeprogression.rad.movies.service.MovieCollection
 sealed class MoviesAction: UserInterfaceAction<MoviesState> {
     class StartScreen(override val page: Int = 1) : MoviesAction(), HasPagedResult {
         override fun getState(currentState: MoviesState): MoviesState {
-            return MoviesState(currentState.list, null, true, false, null, currentState.started)
+            return currentState.copy(
+                    selected = null,
+                    loading = true
+            )
         }
     }
 
@@ -25,20 +28,32 @@ sealed class MoviesAction: UserInterfaceAction<MoviesState> {
 
     class LoadFailed(private val t: Throwable) : MoviesAction() {
         override fun getState(currentState: MoviesState): MoviesState {
-            return MoviesState(currentState.list, currentState.selected, false, false, t.message)
+            return currentState.copy(
+                    loading = false,
+                    refreshing = false,
+                    error = t.message,
+                    started = true
+            )
         }
     }
 
     class LoadCompleted(val movies: MovieCollection) : MoviesAction() {
         override fun getState(currentState: MoviesState): MoviesState {
-            val movies = movies.results
-            return MoviesState(movies, currentState.selected, false, false, null)
+            return currentState.copy(
+                    movies.results,
+                    loading = false,
+                    refreshing = false,
+                    error = null,
+                    started = true
+            )
         }
     }
 
-    class SelectMovie(val position: Int) : MoviesAction() {
+    class SelectMovie(private val position: Int) : MoviesAction() {
         override fun getState(currentState: MoviesState): MoviesState {
-            return MoviesState(currentState.list, position, false, false, null)
+            return currentState.copy(
+                    selected = position
+            )
         }
     }
 

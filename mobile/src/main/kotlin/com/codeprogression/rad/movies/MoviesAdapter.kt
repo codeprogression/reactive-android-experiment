@@ -49,21 +49,22 @@ class MoviesAdapter(
     }
 
     fun update(list: List<MovieItemViewState>) {
-        Single.fromCallable {
-            DiffUtil.calculateDiff(Callback(this.list, list))
+        when {
+            list.isEmpty() -> this.list.clear()
+            else -> Single.fromCallable { DiffUtil.calculateDiff(Callback(this.list, list)) }
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy(
+                            {
+                                it.printStackTrace()
+                            },
+                            { result ->
+                                this.list.clear()
+                                this.list.addAll(list)
+                                result.dispatchUpdatesTo(this)
+                            }
+                    )
         }
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                        {
-                            it.printStackTrace()
-                        },
-                        { result ->
-                            this.list.clear()
-                            this.list.addAll(list)
-                            result.dispatchUpdatesTo(this)
-                        }
-                )
     }
 
     private class Callback(

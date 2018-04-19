@@ -36,7 +36,6 @@ class DefaultMoviesService : MoviesService {
         return Single.fromCallable { client.newCall(request).execute() }
                 .timeout(5, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.computation())
                 .map {
                     gson.fromJson(it.body()?.string(), MovieCollection::class.java)
                 }

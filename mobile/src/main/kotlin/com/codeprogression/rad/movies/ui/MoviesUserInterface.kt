@@ -61,7 +61,7 @@ class MoviesUserInterface @Inject constructor(
                         .map {
                             println(">>>> Action Sent: $it")
                             val state = it.getState(currentState)
-                            println("<<<< State Updated: $state")
+//                            println("<<<< State Updated: $state")
                             state
 
                         }
