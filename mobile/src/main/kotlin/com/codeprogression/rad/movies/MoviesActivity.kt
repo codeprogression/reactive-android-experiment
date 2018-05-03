@@ -1,13 +1,13 @@
 package com.codeprogression.rad.movies
 
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.design.widget.Snackbar
+import android.os.Parcelable
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.View
 import com.codeprogression.rad.R
 import com.codeprogression.rad.databinding.MoviesActivityBinding
 import com.codeprogression.rad.movies.ui.MoviesAction
@@ -23,12 +23,13 @@ import kotlinx.android.synthetic.main.movies_content.*
 
 
 class MoviesActivity : AppCompatActivity() {
-    private lateinit var binding: MoviesActivityBinding
     private lateinit var disposables: CompositeDisposable
+    private lateinit var binding: MoviesActivityBinding
     private lateinit var moviesAdapter: MoviesAdapter
     private lateinit var ui: MoviesUserInterface
     private lateinit var viewStateCallback: ViewStateCallback
-    private lateinit var viewState :MoviesViewState
+    private lateinit var viewState: MoviesViewState
+    private var moviesAdapterState: Parcelable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +44,20 @@ class MoviesActivity : AppCompatActivity() {
         binding.state = viewState
     }
 
+    private fun restoreAdapterState() {
+        moviesAdapterState?.let {
+            moviesView.layoutManager.onRestoreInstanceState(it)
+            moviesAdapterState = null
+        }
+    }
+
+    override fun onDestroy() {
+        disposables.dispose()
+        binding.unbind()
+        super.onDestroy()
+    }
+
+
     override fun onStart() {
         super.onStart()
         viewState.addOnPropertyChangedCallback(viewStateCallback)
@@ -55,30 +70,39 @@ class MoviesActivity : AppCompatActivity() {
                 .addTo(disposables)
     }
 
-
     override fun onStop() {
         super.onStop()
         viewState.removeOnPropertyChangedCallback(viewStateCallback)
         disposables.clear()
     }
 
-    override fun onDestroy() {
-        disposables.dispose()
-        binding.unbind()
-        super.onDestroy()
+    override fun onPause() {
+        super.onPause()
+        moviesAdapterState = moviesView.layoutManager.onSaveInstanceState()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable("recyclerView", moviesAdapterState)
+    }
+
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        moviesAdapterState = savedInstanceState.getParcelable("recyclerView")
+        super.onRestoreInstanceState(savedInstanceState)
     }
 
     private fun setupRecyclerView() {
-        binding.moviesContent?.let {
-            val view = it.moviesView
-            view.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-            view.adapter = moviesAdapter
-        }
+        moviesView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+        moviesView.adapter = moviesAdapter
     }
 
     private fun getActions(): List<Observable<out MoviesAction>> = listOf(
+            // screen start
             Observable.just(MoviesAction.StartScreen()),
+            // swipe to refresh
             RxSwipeRefreshLayout.refreshes(moviesRefresh).map { MoviesAction.RefreshMovies() },
+            // actions from recycler view items
             moviesAdapter.actions
     )
 
@@ -88,10 +112,13 @@ class MoviesActivity : AppCompatActivity() {
                 val viewState = sender as? MoviesViewState
                 viewState?.let { state ->
                     state.selectedItem.get()?.let {
-                        val view = activity.findViewById<View>(R.id.moviesRefresh)
-                        Snackbar.make(view, it as CharSequence, Snackbar.LENGTH_SHORT).show()
+                        activity.startActivity(Intent(activity, MovieDetailActivity::class.java))
+                        return
                     }
+
                     activity.moviesRefresh.isRefreshing = state.refreshing.get()
+
+                    activity.restoreAdapterState()
                 }
             }
         }
